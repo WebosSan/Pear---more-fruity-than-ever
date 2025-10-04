@@ -64,7 +64,7 @@ class SpriteBatch {
         PearEngine.gl.uniform1i(imageUniform, 0);
 
         var vX:Float = sourceX / texture.width;
-        var vY:Float = sourceX / texture.height;
+        var vY:Float = sourceY / texture.height;
 
         var vX2:Float = sourceWidth / texture.width;
         var vY2:Float = sourceHeight / texture.height;
