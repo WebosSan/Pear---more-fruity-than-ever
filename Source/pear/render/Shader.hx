@@ -1,5 +1,6 @@
 package pear.render;
 
+import pear.system.CacheBackend;
 import lime.graphics.WebGLRenderContext;
 import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLShader;
@@ -16,7 +17,7 @@ class Shader {
 		#else
 		var prefix:String = "";
 		#end
-		program = GLProgram.fromSources(gl, vertSource, prefix + fragSource);
+		program = CacheBackend.getProgram(vertSource, prefix + fragSource);
 	}
 
 	public function activate() {
@@ -25,9 +26,5 @@ class Shader {
 
 	public function deactivate() {
 		PearEngine.gl.useProgram(null);
-	}
-
-	public function destroy() {
-		PearEngine.gl.deleteProgram(program);
 	}
 }

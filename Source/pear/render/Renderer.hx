@@ -1,7 +1,7 @@
 package pear.render;
 
 import pear.render.batchs.SpriteBatch;
-import pear.system.AssetsBackend;
+import pear.system.CacheBackend;
 import pear.core.PearEngine;
 import lime.math.Matrix4;
 import pear.render.batchs.RectBatch;
@@ -17,7 +17,7 @@ class Renderer {
 			return;
 		_initialized = true;
 
-		AssetsBackend.init();
+		CacheBackend.init();
 
 		PearEngine.gl.blendFunc(PearEngine.gl.SRC_ALPHA, PearEngine.gl.ONE_MINUS_SRC_ALPHA);
 		PearEngine.gl.enable(PearEngine.gl.BLEND);
@@ -54,5 +54,6 @@ class Renderer {
 
 	@:noCompletion public static function destroy() {
 		_rectBatch.destroy();
+		_spriteBatch.destroy();
 	}
 }

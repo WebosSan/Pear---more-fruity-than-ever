@@ -110,7 +110,6 @@ class RectBatch {
 	
 
 	public function destroy() {
-		shader.destroy();
 		PearEngine.gl.deleteBuffer(vbo);
 	}
 }

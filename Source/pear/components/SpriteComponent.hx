@@ -1,6 +1,6 @@
 package pear.components;
 
-import pear.system.AssetsBackend;
+import pear.system.CacheBackend;
 import lime.math.Vector4;
 import lime.math.Matrix4;
 import pear.render.Renderer;
@@ -41,7 +41,7 @@ class SpriteComponent extends Component {
 	private function set_path(v:String):String {
 		if (_texture != null)
 			_texture.destroy();
-		_texture = AssetsBackend.getTexture(v);
+		_texture = CacheBackend.getTexture(v);
 		return path = v;
 	}
 }

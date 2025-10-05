@@ -153,21 +153,41 @@ class AnimationController {
         stopped = false;
     }
 
+    private var timeAccumulator:Float = 0;
+    private var frameTime:Float = 0;
+    private var smoothFrame:Float = 0; 
+    
     public function update(dt:Float) {
-        if (!stopped)
-            currentIndex += dt * currentAnimation.framerate;
-
-        if (currentIndex >= currentAnimation.frames.length) {
-            if (currentAnimation.loop)
-                currentIndex = 0;
-            else {
-                stopped = true;
-                currentIndex = currentAnimation.frames.length - 1;
+        if (stopped || currentAnimation == null || currentAnimation.frames.length == 0)
+            return;
+    
+        dt = Math.min(dt, 0.05);
+        frameTime = 1 / currentAnimation.framerate;
+    
+        timeAccumulator += dt;
+    
+        while (timeAccumulator >= frameTime) {
+            timeAccumulator -= frameTime;
+            currentIndex++;
+    
+            if (currentIndex >= currentAnimation.frames.length) {
+                if (currentAnimation.loop)
+                    currentIndex = 0;
+                else {
+                    stopped = true;
+                    currentIndex = currentAnimation.frames.length - 1;
+                    timeAccumulator = 0;
+                }
             }
         }
-
-        currentFrame = currentAnimation.frames[Math.floor(currentIndex)];
-    }
+    
+        var frameIndex:Int = Math.floor(currentIndex);
+        var alpha:Float = timeAccumulator / frameTime;
+    
+        smoothFrame = frameIndex + alpha;
+    
+        currentFrame = currentAnimation.frames[Math.floor(smoothFrame)];
+    }    
 
     public function render() {
         if (currentFrame == null) return;

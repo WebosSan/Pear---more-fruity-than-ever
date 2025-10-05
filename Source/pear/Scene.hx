@@ -3,7 +3,7 @@ package pear;
 import pear.core.PearEngine;
 import lime.app.Event;
 
-class World {
+class Scene {
     public var entities:Array<Entity>;
     
     public var onUpdate(default, null) = new Event<Float->Void>();

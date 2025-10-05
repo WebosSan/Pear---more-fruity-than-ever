@@ -1,7 +1,7 @@
 package pear.render.batchs;
 
 import lime.math.Matrix4;
-import pear.system.AssetsBackend;
+import pear.system.CacheBackend;
 import lime.graphics.opengl.GLUniformLocation;
 import lime.utils.Float32Array;
 import lime.graphics.opengl.GLBuffer;
@@ -93,5 +93,9 @@ class SpriteBatch {
         PearEngine.gl.drawArrays(PearEngine.gl.TRIANGLE_STRIP, 0, 4);
         shader.deactivate();
         texture.unbind();
+    }
+
+    public function destroy() {
+        PearEngine.gl.deleteBuffer(glBuffer);
     }
 }
