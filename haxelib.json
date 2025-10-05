@@ -1,16 +1,14 @@
 {
-    "name": "useless_lib",
+    "name": "pearengine",
     "url" : "https://github.com/jasononeil/useless/",
     "license": "MIT",
-    "tags": ["cross", "useless"],
-    "description": "This library is useless in the same way on every platform.",
+    "tags": ["game"],
+    "description": "Pear Engine - a basic lime game engine using opengl context.",
     "version": "1.0.0",
-    "classPath": "src/",
-    "releasenote": "Initial release, everything is working correctly.",
-    "contributors": ["Juraj","Jason","Nicolas"],
+    "classPath": "Source/",
+    "releasenote": "Pear Engine 1.0.0",
+    "contributors": ["WebosSan-JonkIsKindaCool"],
     "dependencies": {
-      "tink_macro": "",
-      "nme": "3.5.5"
-    },
-    "main": "tools.Main"
-  }
+      "lime": ""
+    }
+}
