@@ -15,8 +15,9 @@ class Entity {
         components = new Map();
     }
 
-    public function setComponent<T:Component>(c:T):Void {
+    public function setComponent<T:Component>(c:T):T {
         components.set(Type.getClassName(Type.getClass(c)), c);
+        return c;
     }
 
     public function getComponent<T:Component>(cls:Class<T>):Null<T> {

@@ -3,7 +3,6 @@ package pear.animations;
 import lime.math.Vector4;
 import lime.math.Matrix4;
 import lime.utils.Assets;
-import pear.render.Renderer;
 import pear.components.AnimationComponent;
 import pear.components.TransformComponent;
 import haxe.xml.Access;
@@ -210,16 +209,20 @@ class AnimationController {
         model.appendTranslation(transform.x, transform.y, 0);
         model.appendTranslation(-currentFrame.offsetX ?? 0, -currentFrame.offsetY ?? 0, 0);
 
+        /*
         @:privateAccess
         Renderer.drawSprite(
             parent._texture,
             model,
-            currentFrame.width,
-            currentFrame.height,
+            currentFrame.width * transform.scale.x,
+            currentFrame.height * transform.scale.y,
             currentFrame.x,
             currentFrame.y,
             currentFrame.width,
-            currentFrame.height
-        );
+            currentFrame.height,
+            parent.flipX,
+            parent.flipY,
+            parent.color
+        );ç*/
     }
 }

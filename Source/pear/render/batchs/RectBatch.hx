@@ -1,115 +1,145 @@
 package pear.render.batchs;
 
-import lime.math.Matrix4;
-import pear.render.Renderer;
-import pear.core.PearEngine;
-import lime.graphics.WebGLRenderContext;
+import pear.system.PearGL;
+import lime.math.Vector2;
+import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLUniformLocation;
 import lime.utils.Float32Array;
+import lime.math.Matrix4;
+import pear.utils.Color;
+import pear.core.PearEngine;
+import pear.utils.MathUtils;
 
 class RectBatch {
-	var gl:WebGLRenderContext;
-	var shader:Shader;
-	var vbo:GLBuffer;
-	var posLoc:Int;
-	var colorLoc:GLUniformLocation;
-	var projectionLoc:GLUniformLocation;
-	var translateLoc:GLUniformLocation;
-	var customLoc:GLUniformLocation;
-
-	public function new() {
-		gl = PearEngine.gl;
-
-		var vertSrc:String = '
+    #if lime_webgl
+    static var vertexSrc = "
         attribute vec2 a_position;
+        attribute vec4 a_color;
         uniform mat4 u_projection;
-        uniform mat4 u_translate;
+        varying vec4 v_color;
 
-        void main(void) {
-            gl_Position = u_projection * u_translate * vec4(a_position, 0.0, 1.0);
+        void main() {
+            v_color = a_color;
+            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
         }
-        ';
+    ";
 
-		var fragSrc:String = '
-        uniform vec4 u_color;
-        void main(void) {
-            gl_FragColor = u_color;
+    static var fragmentSrc = "
+        precision mediump float;
+        varying vec4 v_color;
+        void main() {
+            gl_FragColor = v_color;
         }
-        ';
+    ";
+    #else
+    static var vertexSrc = "
+        attribute vec2 a_position;
+        attribute vec4 a_color;
+        uniform mat4 u_projection;
+        varying vec4 v_color;
 
-		shader = new Shader(vertSrc, fragSrc);
+        void main() {
+            v_color = a_color;
+            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
+        }
+    ";
 
-		vbo = gl.createBuffer();
+    static var fragmentSrc = "
+        varying vec4 v_color;
+        void main() {
+            gl_FragColor = v_color;
+        }
+    ";
+    #end
 
-		shader.activate();
-		posLoc = gl.getAttribLocation(shader.program, "a_position");
-		projectionLoc = gl.getUniformLocation(shader.program, "u_projection");
-		translateLoc = gl.getUniformLocation(shader.program, "u_translate");
-	}
+    private static var shader:Shader;
+    private static var u_projection:GLUniformLocation;
+    private static var a_position:Int;
+    private static var a_color:Int;
+    private static var vbo:GLBuffer;
 
-	public function draw(w:Float, h:Float, color:Array<Float>, ?matrix:Matrix4) {
-		var verts:Array<Float> = [
-			0, 0,
-			w, 0,
-			0, h,
+    static inline var MAX_RECTS:Int = 1000;
+    static inline var FLOATS_PER_VERTEX:Int = 6;
+    static inline var FLOATS_PER_RECT:Int = FLOATS_PER_VERTEX * 6;
 
-			w, 0,
-			w, h,
-			0, h
-		];
+    private static var vertexData:Float32Array;
+    private static var vertexCount:Int = 0;
 
-		shader.activate();
+    public static function init() {
+        shader = new Shader(vertexSrc, fragmentSrc);
+        shader.activate();
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
+        a_position = gl.getAttribLocation(shader.program, "a_position");
+        a_color = gl.getAttribLocation(shader.program, "a_color");
+        u_projection = gl.getUniformLocation(shader.program, "u_projection");
 
-		gl.enableVertexAttribArray(posLoc);
-		gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+        shader.deactivate();
 
-		gl.uniformMatrix4fv(projectionLoc, false, PearEngine.projection);
-		gl.uniformMatrix4fv(translateLoc, false, matrix ?? new Matrix4());
+        vertexData = new Float32Array(MAX_RECTS * FLOATS_PER_RECT);
 
-		gl.uniform4f(colorLoc, color[0], color[1], color[2], color[3]);
+        vbo = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
+        PearGL.bufferData(gl.ARRAY_BUFFER, vertexData, gl.DYNAMIC_DRAW);
 
-		gl.disableVertexAttribArray(posLoc);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-	}
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    }
 
-	public function drawOutline(w:Float, h:Float, color:Array<Float>, thickness:Float = 1, ?matrix:Matrix4) {
-		var verts:Array<Float> = [
-			0, 0,   
-			w, 0,  
-			w, h,   
-			0, h   
-		];
-	
-		shader.activate();
-	
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
-	
-		gl.enableVertexAttribArray(posLoc);
-		gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-	
-		gl.uniformMatrix4fv(projectionLoc, false, PearEngine.projection);
-		gl.uniformMatrix4fv(translateLoc, false, matrix ?? new Matrix4());
-		gl.uniform4f(colorLoc, color[0], color[1], color[2], color[3]);
-	
-		gl.lineWidth(thickness);
-	
-		gl.drawArrays(gl.LINE_LOOP, 0, 4);
-	
-		gl.disableVertexAttribArray(posLoc);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-	
-		gl.lineWidth(1);
-	}	
-	
+    public static function drawRectangle(width:Float, height:Float, color:Color, ?matrix:Matrix4) {
+        if (vertexCount + 6 > MAX_RECTS * 6)
+            flush();
 
-	public function destroy() {
-		PearEngine.gl.deleteBuffer(vbo);
-	}
+        if (matrix == null)
+            matrix = MathUtils.identityMatrix;
+
+        inline function push(x:Float, y:Float) {
+            var v:Vector2 = MathUtils.applyMatrixToCoordinates(x, y, matrix);
+            var i:Int = vertexCount * FLOATS_PER_VERTEX;
+            vertexData[i] = v.x;
+            vertexData[i + 1] = v.y;
+            vertexData[i + 2] = color.redFloat;
+            vertexData[i + 3] = color.greenFloat;
+            vertexData[i + 4] = color.blueFloat;
+            vertexData[i + 5] = color.alphaFloat;
+            vertexCount++;
+        }
+
+        push(0, 0);
+        push(width, 0);
+        push(0, height);
+        push(width, 0);
+        push(width, height);
+        push(0, height);
+    }
+
+    public static function flush() {
+        if (vertexCount == 0)
+            return;
+
+        shader.activate();
+
+        PearGL.uniformMatrix4fv(u_projection, false, PearEngine.projection);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
+        PearGL.bufferSubData(gl.ARRAY_BUFFER, vertexData.subarray(0, vertexCount * FLOATS_PER_VERTEX));
+
+        gl.enableVertexAttribArray(a_position);
+        gl.enableVertexAttribArray(a_color);
+
+        var stride:Int = FLOATS_PER_VERTEX * Float32Array.BYTES_PER_ELEMENT;
+        gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, stride, 0);
+        gl.vertexAttribPointer(a_color, 4, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);
+
+        gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+
+        vertexCount = 0;
+        shader.deactivate();
+    }
+
+    public static function destroy() {
+        gl.deleteBuffer(vbo);
+        gl.deleteProgram(shader.program);
+    }
 }

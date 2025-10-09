@@ -10,8 +10,8 @@ class AnimationComponent extends SpriteComponent {
 
 	public function new(parent:Entity, path:String, ?frameWidth:Float = 0, ?frameHeight:Float = 0) {
 		super(parent, path);
-        this.defaultFrameHeight = frameWidth;
-        this.defaultFrameWitdh = frameHeight;
+        this.defaultFrameHeight = frameHeight;
+        this.defaultFrameWitdh = frameWidth;
 
         animation = new AnimationController(this);
 	}

@@ -1,8 +1,8 @@
 package pear.components;
 
+import pear.render.ExperimentalRenderer;
 import lime.math.Matrix4;
 import lime.math.Vector4;
-import pear.render.Renderer;
 
 class RectComponent extends Component {
     public var width:Float;
@@ -32,6 +32,6 @@ class RectComponent extends Component {
         model.appendTranslation(width / 2, height / 2, 0);
         model.appendTranslation(transform.x, transform.y, 0);
 
-        Renderer.fillRect(width, height, color, model);
+        ExperimentalRenderer.drawRectangle(width, height, color, model);
     }
 }

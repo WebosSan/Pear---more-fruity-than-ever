@@ -25,7 +25,7 @@ class CacheBackend {
     public static function getTexture(path:String):Texture {
         if (_textureCache.exists(path)) return _textureCache.get(path);
 
-        var texture:Texture = new Texture(path);
+        var texture:Texture = Texture.fromFile(path);
         _textureCache.set(path, texture);
         return texture;
     }
@@ -59,7 +59,7 @@ class CacheBackend {
             try buffer.dispose() catch (_) {}
         }
         for (program in _shaderCache){
-            try PearEngine.gl.deleteProgram(program) catch (_) {};
+            try gl.deleteProgram(program) catch (_) {};
         }
         _textureCache.clear();
         _audioCache.clear();

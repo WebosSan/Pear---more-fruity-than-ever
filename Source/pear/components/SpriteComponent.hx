@@ -3,14 +3,21 @@ package pear.components;
 import pear.system.CacheBackend;
 import lime.math.Vector4;
 import lime.math.Matrix4;
-import pear.render.Renderer;
 import pear.render.Texture;
 
 class SpriteComponent extends Component {
 	public var width:Float;
 	public var height:Float;
 
+	public var flipX:Bool = false;
+	public var flipY:Bool = false;
+
+	public var color:Int = 0xFFFFFFFF;
+
 	public var path(default, set):String;
+
+	public var offsetX:Float = 0;
+	public var offsetY:Float = 0;
 
 	private var _texture:Texture;
 
@@ -33,9 +40,9 @@ class SpriteComponent extends Component {
 		model.appendScale(transform.scale.x, transform.scale.y, 1);
 		model.appendRotation(transform.angle, new Vector4(0, 0, 1, 0));
 		model.appendTranslation(width / 2, height / 2, 0);
-		model.appendTranslation(transform.x, transform.y, 0);
+		model.appendTranslation(transform.x + offsetX, transform.y + offsetY, 0);
 
-		Renderer.drawSprite(_texture, model, width, height);
+		//Renderer.drawSprite(_texture, model, width * transform.scale.x, height * transform.scale.y, 0, 0, -1, -1, flipX, flipY, color);
 	}
 
 	private function set_path(v:String):String {

@@ -2,10 +2,11 @@
 <project>
 	
 	<meta title="Basic Game" package="jonkiskindacool.pearengine" version="1.0.0" company="Jonk" />
-	<app main="pear.core.others.AutocompletitionHelper" path="Export" file="Jonk" />
+	<app main="Main" path="Export" file="Jonk" />
 	
-	<source path="Source" />
+	<source path="src" />
 	
 	<haxelib name="lime" />
+    <haxelib name="pearengine"/>	
 
 </project>
